@@ -8,7 +8,7 @@ public class Task2 {
 
 	public static void main(String @NotNull [] args) {
 		if (args.length != 3) {
-			throw new IllegalArgumentException("Not enough arguments");
+			throw new IllegalArgumentException("Invalid number of arguments");
 		}
 
 		int firstElement = Integer.parseInt(args[0]);

@@ -1,9 +1,8 @@
 package ru.croc.task2.Core.Models;
 
-import ru.croc.task2.Core.Abstractions.IProgression;
+import ru.croc.task2.Core.Abstractions.Progression;
 
-public class ArithmeticProgression implements IProgression {
-
+public class ArithmeticProgression implements Progression {
 	private final int _firstElement, _diff;
 
 	public ArithmeticProgression(int firstElement, int diff) {

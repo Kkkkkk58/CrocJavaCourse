@@ -1,12 +1,11 @@
 package ru.croc.task2.Core.Models;
 
-import ru.croc.task2.Core.Abstractions.IProgression;
-import ru.croc.task2.Core.Abstractions.IProgressionSumCounter;
+import ru.croc.task2.Core.Abstractions.Progression;
+import ru.croc.task2.Core.Abstractions.ProgressionSumCounter;
 
-public class ArithmeticProgressionSumCounter implements IProgressionSumCounter {
-
+public class ArithmeticProgressionSumCounter implements ProgressionSumCounter {
 	@Override
-	public int getProgressionSum(IProgression progression, int numberOfElements) {
+	public int getProgressionSum(Progression progression, int numberOfElements) {
 		if (!(progression instanceof ArithmeticProgression)) {
 			throw new IllegalArgumentException(
 				"Counter must be provided with ArithmeticProgression");

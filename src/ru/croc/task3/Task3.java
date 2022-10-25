@@ -1,7 +1,7 @@
 package ru.croc.task3;
 
 import org.jetbrains.annotations.NotNull;
-import ru.croc.task3.Core.Abstractions.ITriangleAreaCounter;
+import ru.croc.task3.Core.Abstractions.TriangleAreaCounter;
 import ru.croc.task3.Core.Entities.Point;
 import ru.croc.task3.Core.Entities.Triangle;
 import ru.croc.task3.Core.Exceptions.TriangleException;
@@ -13,7 +13,7 @@ public class Task3 {
 
 	public static void main(String @NotNull [] args) {
 		if (args.length != COORDINATES_NUMBER) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Invalid number of arguments");
 		}
 
 		double[] coordinates = parseCoordinates(args);
@@ -24,7 +24,7 @@ public class Task3 {
 		try {
 			Triangle triangle = new Triangle(new Point[]{a, b, c});
 
-			ITriangleAreaCounter counter = new HeronTriangleAreaCounter();
+			TriangleAreaCounter counter = new HeronTriangleAreaCounter();
 			double area = counter.getArea(triangle);
 
 			System.out.println("Area: " + area);

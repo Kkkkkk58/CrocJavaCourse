@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import ru.croc.task3.Core.Exceptions.TriangleException;
 
 public class Triangle {
-
 	final static private int TRIANGLE_SIDES = 3;
 	private final Point[] _points;
 	private final double[] _lengths;

@@ -1,9 +1,7 @@
 package ru.croc.task2.Core.Abstractions;
 
-public interface IProgression {
-
+public interface Progression {
 	int firstElement();
-
 	int diff();
 }
 

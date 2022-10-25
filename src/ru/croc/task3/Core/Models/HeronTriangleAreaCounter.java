@@ -2,11 +2,10 @@ package ru.croc.task3.Core.Models;
 
 import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
-import ru.croc.task3.Core.Abstractions.ITriangleAreaCounter;
+import ru.croc.task3.Core.Abstractions.TriangleAreaCounter;
 import ru.croc.task3.Core.Entities.Triangle;
 
-public class HeronTriangleAreaCounter implements ITriangleAreaCounter {
-
+public class HeronTriangleAreaCounter implements TriangleAreaCounter {
 	@Override
 	public double getArea(@NotNull Triangle triangle) {
 		double[] lengths = triangle.lengths();
