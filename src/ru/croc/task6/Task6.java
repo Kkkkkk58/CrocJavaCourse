@@ -7,6 +7,12 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Task6 {
+
+	/***
+	 * An entrypoint for interaction with JavaCommentRemover
+	 * @param args The name of the file to remove comments from
+	 * @throws IOException In case I/O operations fail
+	 */
 	public static void main(String @NotNull [] args) throws IOException {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("Invalid count of input parameters");
