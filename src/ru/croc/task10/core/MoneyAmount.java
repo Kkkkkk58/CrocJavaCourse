@@ -1,10 +1,12 @@
 package ru.croc.task10.core;
 
-import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 import java.util.Currency;
+import org.jetbrains.annotations.NotNull;
+import ru.croc.task10.exceptions.MoneyAmountException;
 
 public class MoneyAmount implements Comparable<MoneyAmount> {
+
 	private final BigDecimal amount;
 	private final Currency currency;
 
@@ -14,12 +16,12 @@ public class MoneyAmount implements Comparable<MoneyAmount> {
 	}
 
 	@Override
-	public int compareTo(@NotNull MoneyAmount o) {
-		if (!currency.equals(o.currency)) {
-			throw new IllegalArgumentException();
+	public int compareTo(@NotNull MoneyAmount other) {
+		if (!currency.equals(other.currency)) {
+			throw MoneyAmountException.MismatchingCurrencies(other.currency, currency);
 		}
 
-		return amount.compareTo(o.amount);
+		return amount.compareTo(other.amount);
 	}
 
 	@Override

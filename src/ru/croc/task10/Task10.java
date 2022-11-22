@@ -6,9 +6,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Currency;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import ru.croc.task10.core.ThreadSafeLot;
 import ru.croc.task10.core.MoneyAmount;
+import ru.croc.task10.core.ThreadSafeLot;
 import ru.croc.task10.core.abstractions.Lot;
+import ru.croc.task10.exceptions.LotException;
 
 public class Task10 {
 
@@ -23,9 +24,10 @@ public class Task10 {
 	}
 
 	private static class Tester implements Runnable {
+
 		private final String bidderName;
 		private final Lot lot;
-		private int sleep;
+		private final int sleep;
 
 		private Tester(String bidderName, Lot lot, int sleep) {
 			this.bidderName = bidderName;
@@ -46,8 +48,8 @@ public class Task10 {
 					System.out.println(result);
 					Thread.sleep(1000L * sleep);
 				}
-			} catch (InterruptedException e) {
-				System.out.println("Stopped");
+			} catch (InterruptedException | LotException e) {
+				System.out.println(e.getMessage());
 			}
 		}
 	}
