@@ -7,7 +7,7 @@ import ru.croc.task10.exceptions.LotException;
 
 public interface Lot {
 
-	void acceptBet(MoneyAmount newCost, String buyer, LocalDateTime betTime)
+	void acceptBet(MoneyAmount newCost, String buyer)
 		throws LotException;
 
 	String getWinnerName();
