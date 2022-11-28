@@ -12,8 +12,8 @@ import ru.croc.task13.core.RecommendationService;
 import ru.croc.task13.core.entities.Film;
 
 public class Task13 {
-	private static final String filmsPath = "src/ru/croc/task13/resources/films_train.csv";
-	private static final String statisticsPath = "src/ru/croc/task13/resources/ratings_train.csv";
+	private static final String filmsPath = "src/ru/croc/task13/resources/films_test.csv";
+	private static final String statisticsPath = "src/ru/croc/task13/resources/ratings_test.csv";
 
 	public static void main(String[] args) throws IOException {
 		List<Film> films = getFilms();
