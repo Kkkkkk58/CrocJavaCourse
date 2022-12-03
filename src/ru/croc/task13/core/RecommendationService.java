@@ -11,7 +11,7 @@ public class RecommendationService {
 
 	private static final double MIN_SIMILARITY_RATE = 0.5;
 	private final List<Film> films;
-	private final List<Map<Long, Long>> overallWatchFrequency;
+	private final List<Map<Film, Long>> overallWatchFrequency;
 
 	/**
 	 * .ctor of recommendation service
@@ -21,7 +21,9 @@ public class RecommendationService {
 	 */
 	public RecommendationService(List<Film> films, List<List<Long>> overallWatchStatistics) {
 		this.films = films;
-		this.overallWatchFrequency = overallWatchStatistics.stream().map(this::getFrequencyRate)
+		this.overallWatchFrequency = overallWatchStatistics
+			.stream()
+			.map(this::getFrequencyRate)
 			.collect(Collectors.toList());
 	}
 
@@ -32,7 +34,7 @@ public class RecommendationService {
 	 * @return next recommended film
 	 */
 	public Film recommendFilm(List<Long> userWatchList) {
-		Map<Long, Long> userWatchFrequency = getFrequencyRate(userWatchList);
+		Map<Film, Long> userWatchFrequency = getFrequencyRate(userWatchList);
 		Map<Integer, Double> userRecommendationWeight = new HashMap<>();
 		Set<Film> possibleRecommendations = new HashSet<>();
 
@@ -53,12 +55,12 @@ public class RecommendationService {
 	 * @param possibleRecommendations  list of possible recommendations
 	 */
 	private void getPossibleRecommendationsAndWeights(
-		Map<Long, Long> userWatchFrequency,
+		Map<Film, Long> userWatchFrequency,
 		Map<Integer, Double> userRecommendationWeight,
 		Set<Film> possibleRecommendations) {
 
 		for (int i = 0; i < overallWatchFrequency.size(); ++i) {
-			Map<Long, Long> userFromBaseWatchFrequency = overallWatchFrequency.get(i);
+			Map<Film, Long> userFromBaseWatchFrequency = overallWatchFrequency.get(i);
 			double weight = getRecommendationWeight(userWatchFrequency, userFromBaseWatchFrequency);
 			userRecommendationWeight.put(i, weight);
 
@@ -77,10 +79,10 @@ public class RecommendationService {
 	 * @return weight of recommendation
 	 */
 	private static double getRecommendationWeight(
-		Map<Long, Long> userWatchFrequency,
-		Map<Long, Long> userFromBaseWatchFrequency) {
+		Map<Film, Long> userWatchFrequency,
+		Map<Film, Long> userFromBaseWatchFrequency) {
 
-		Set<Long> intersections = new HashSet<>(userWatchFrequency.keySet());
+		Set<Film> intersections = new HashSet<>(userWatchFrequency.keySet());
 		intersections.retainAll(userFromBaseWatchFrequency.keySet());
 
 		return (double) intersections.size() / userWatchFrequency.size();
@@ -94,18 +96,14 @@ public class RecommendationService {
 	 * @param userFromBaseWatchFrequency statistics about another user from base
 	 */
 	private void getNewRecommendations(
-		Map<Long, Long> userWatchFrequency,
+		Map<Film, Long> userWatchFrequency,
 		Set<Film> possibleRecommendations,
-		Map<Long, Long> userFromBaseWatchFrequency) {
+		Map<Film, Long> userFromBaseWatchFrequency) {
 
-		Set<Long> unwatchedFilms = new HashSet<>(userFromBaseWatchFrequency.keySet());
+		Set<Film> unwatchedFilms = new HashSet<>(userFromBaseWatchFrequency.keySet());
 		unwatchedFilms.removeAll(userWatchFrequency.keySet());
 
-		for (Long filmId : unwatchedFilms) {
-			Optional<Film> recommendation = films.stream().filter(film -> film.id() == filmId)
-				.findFirst();
-			recommendation.ifPresent(possibleRecommendations::add);
-		}
+		possibleRecommendations.addAll(unwatchedFilms);
 	}
 
 	/**
@@ -126,7 +124,7 @@ public class RecommendationService {
 		}
 
 		for (int i = 0; i < overallWatchFrequency.size(); ++i) {
-			Map<Long, Long> userFromBaseWatchFrequency = overallWatchFrequency.get(i);
+			Map<Film, Long> userFromBaseWatchFrequency = overallWatchFrequency.get(i);
 			double recommendationWeight = userRecommendationWeight.get(i);
 			analyzeUserFromBaseWeights(recommendationAnalysis, possibleRecommendations,
 				userFromBaseWatchFrequency, recommendationWeight);
@@ -147,12 +145,12 @@ public class RecommendationService {
 	private static void analyzeUserFromBaseWeights(
 		Map<Film, Double> recommendationAnalysis,
 		Set<Film> possibleRecommendations,
-		Map<Long, Long> userFromBaseWatchFrequency,
+		Map<Film, Long> userFromBaseWatchFrequency,
 		double recommendationWeight) {
 
 		for (int j = 0; j < userFromBaseWatchFrequency.size(); ++j) {
 			for (Film recommendation : possibleRecommendations) {
-				if (userFromBaseWatchFrequency.containsKey(recommendation.id())) {
+				if (userFromBaseWatchFrequency.containsKey(recommendation)) {
 					double recommendationLevel = getRecommendationLevel(recommendationAnalysis,
 						userFromBaseWatchFrequency, recommendationWeight, recommendation);
 					recommendationAnalysis.replace(recommendation, recommendationLevel);
@@ -172,12 +170,12 @@ public class RecommendationService {
 	 */
 	private static double getRecommendationLevel(
 		Map<Film, Double> recommendationAnalysis,
-		Map<Long, Long> userFromBaseWatchFrequency,
+		Map<Film, Long> userFromBaseWatchFrequency,
 		double recommendationWeight,
 		Film recommendation) {
 
 		return recommendationAnalysis.get(recommendation)
-			+ recommendationWeight * userFromBaseWatchFrequency.get(recommendation.id());
+			+ recommendationWeight * userFromBaseWatchFrequency.get(recommendation);
 	}
 
 	/**
@@ -192,14 +190,28 @@ public class RecommendationService {
 	}
 
 	/**
-	 * Creates map of frequencies where key is film id and value is the number of times the film was
+	 * Creates map of frequencies where key is film and value is the number of times the film was
 	 * watched by user
 	 *
 	 * @param watchList List of film identifiers
 	 * @return map of frequency rates
 	 */
-	private Map<Long, Long> getFrequencyRate(List<Long> watchList) {
-		return watchList.stream().collect(
-			Collectors.groupingBy(Function.identity(), HashMap::new, Collectors.counting()));
+	private HashMap<Film, Long> getFrequencyRate(List<Long> watchList) {
+		return watchList
+			.stream()
+			.map(this::getFilm)
+			.collect(
+				Collectors.groupingBy(Function.identity(), HashMap::new, Collectors.counting()));
+	}
+
+	@NotNull
+	private Film getFilm(Long id) {
+		return films
+			.stream()
+			.filter(film -> film.id() == id)
+			.reduce((a, b) -> {
+				throw new IllegalStateException("Invalid film id");
+			})
+			.orElseThrow(() -> new IllegalStateException("Film not found"));
 	}
 }
