@@ -1,21 +1,20 @@
 package ru.croc.task15;
 
-import ru.croc.task15.core.AgeGroup;
-import ru.croc.task15.core.PersonalInfo;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import org.jetbrains.annotations.NotNull;
+import ru.croc.task15.core.AgeGroup;
+import ru.croc.task15.core.FocusGroups;
+import ru.croc.task15.core.PersonalInfo;
 
 public class Task15 {
 
 	public static void main(String[] args) {
 		List<AgeGroup> ageGroups = getAgeGroups(args);
-		Map<AgeGroup, SortedSet<PersonalInfo>> map = new TreeMap<>(Comparator.comparingInt(AgeGroup::getAgeFrom).reversed());
+		var focusGroups = new FocusGroups();
 
 		Scanner input = new Scanner(System.in);
 		while (true) {
@@ -23,35 +22,13 @@ public class Task15 {
 			if ("END".equals(line)) {
 				break;
 			}
-			String[] personalInfoParts = line.split(",");
-			PersonalInfo personalInfo = new PersonalInfo(personalInfoParts[0], Integer.parseInt(personalInfoParts[1]));
-			AgeGroup matchingGroup = ageGroups
-				.stream()
-				.filter(ageGroup -> ageGroup.getAgeFrom() <= personalInfo.getAge()
-				&& (ageGroup.getAgeTo() == null || ageGroup.getAgeTo() >= personalInfo.getAge()))
-				.reduce((a, b) -> {
-					throw new IllegalStateException("Too many elements match the predicate");
-				})
-				.orElseThrow(() -> new IllegalStateException("No element matches the predicate"));
+			PersonalInfo personalInfo = getPersonalInfo(line);
+			AgeGroup matchingGroup = getAgeGroup(ageGroups, personalInfo);
 
-			if (map.containsKey(matchingGroup)) {
-				map.get(matchingGroup).add(personalInfo);
-			}
-			else {
-				SortedSet<PersonalInfo> set = new TreeSet<>(
-					Comparator.comparingInt(PersonalInfo::getAge).reversed().thenComparing(PersonalInfo::getName));
-				set.add(personalInfo);
-				map.put(matchingGroup, set);
-			}
+			focusGroups.addGroupRepresentative(matchingGroup, personalInfo);
 		}
 
-		for (Map.Entry<AgeGroup, SortedSet<PersonalInfo>> entry : map.entrySet()) {
-			System.out.print(entry.getKey() + ": ");
-			for (PersonalInfo personalInfo : entry.getValue()) {
-				System.out.print(personalInfo + " ");
-			}
-			System.out.println();
-		}
+		printFocusGroups(focusGroups);
 	}
 
 	private static List<AgeGroup> getAgeGroups(String[] ages) {
@@ -66,5 +43,33 @@ public class Task15 {
 		ageGroups.add(new AgeGroup(ageFrom, null));
 
 		return ageGroups;
+	}
+
+	@NotNull
+	private static PersonalInfo getPersonalInfo(String line) {
+		String[] personalInfoParts = line.split(",");
+		return new PersonalInfo(personalInfoParts[0], Integer.parseInt(personalInfoParts[1]));
+	}
+
+	private static AgeGroup getAgeGroup(List<AgeGroup> ageGroups, PersonalInfo personalInfo) {
+		return ageGroups
+			.stream()
+			.filter(ageGroup -> ageGroup.getAgeFrom() <= personalInfo.getAge()
+				&& ageGroup.getAgeTo() >= personalInfo.getAge())
+			.reduce((a, b) -> {
+				throw new IllegalStateException("Too many elements match the predicate");
+			})
+			.orElseThrow(() -> new IllegalStateException("No element matches the predicate"));
+	}
+
+	private static void printFocusGroups(FocusGroups focusGroups) {
+		for (Map.Entry<AgeGroup, SortedSet<PersonalInfo>> entry : focusGroups.getGroups()
+			.entrySet()) {
+			System.out.print(entry.getKey() + ": ");
+			for (PersonalInfo personalInfo : entry.getValue()) {
+				System.out.print(personalInfo + " ");
+			}
+			System.out.println();
+		}
 	}
 }
