@@ -13,8 +13,21 @@ import ru.croc.task17.core.entities.Product;
 
 public class ShopDbSeeder implements DbSeeder<Order> {
 
+
 	@Override
 	public void seedDb(Connection connection, Iterable<Order> seeding) {
+		seedProducts(connection, seeding);
+		for (Order order : seeding) {
+			seedOrderData(connection, order);
+
+			Iterable<Product> orderProducts = order.getProducts();
+			for (Product product : orderProducts) {
+				seedOrderProducts(connection, order, product);
+			}
+		}
+	}
+
+	private static void seedProducts(Connection connection, Iterable<Order> seeding) {
 		var products = StreamSupport.stream(seeding.spliterator(), false)
 			.map(Order::getProducts)
 			.flatMap(Collection::stream)
@@ -22,10 +35,10 @@ public class ShopDbSeeder implements DbSeeder<Order> {
 			.toList();
 
 		String sql = """
-					INSERT INTO Products(vendor_code, name, price)
-					VALUES( ? , ? , ? )
-					""";
-		for (Product product: products) {
+			INSERT INTO Products(vendor_code, name, price)
+			VALUES( ? , ? , ? )
+			""";
+		for (Product product : products) {
 			try (PreparedStatement statement = connection.prepareStatement(sql,
 				Statement.RETURN_GENERATED_KEYS)) {
 				statement.setString(1, product.vendorCode());
@@ -36,49 +49,53 @@ public class ShopDbSeeder implements DbSeeder<Order> {
 				throw new RuntimeException(e);
 			}
 		}
+	}
 
-		for (Order order : seeding) {
-			sql = """
-							MERGE INTO Orders(id, buyer_name)
-							KEY(id)
-							VALUES(?, ?)
-							""";
-			try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-				stmt.setInt(1, order.getId());
-				stmt.setString(2, order.getBuyerName());
-				stmt.executeUpdate();
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
+	private static void seedOrderData(Connection connection, Order order) {
+		String sql = """
+			MERGE INTO Orders(id, buyer_name)
+			KEY(id)
+			VALUES(?, ?)
+			""";
+		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setInt(1, order.getId());
+			stmt.setString(2, order.getBuyerName());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
+	private static void seedOrderProducts(Connection connection, Order order, Product product) {
+		String sql = """
+			SELECT * FROM Products WHERE vendor_code = ?
+			""";
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setString(1, product.vendorCode());
+			fillOrderProductsData(connection, order, statement);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-			Iterable<Product> orderProducts = order.getProducts();
-			for (Product product: orderProducts) {
-				sql = """
-				SELECT * FROM Products WHERE vendor_code = ?
-				""";
-			try (PreparedStatement statement = connection.prepareStatement(sql)) {
-				statement.setString(1, product.vendorCode());
-				try (ResultSet resultSet = statement.executeQuery()) {
-					if (resultSet.first()) {
-						int productId = resultSet.getInt("id");
-						sql = """
-							INSERT INTO OrderProducts(order_id, product_id)
-							VALUES( ? , ? )
-							""";
-						try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-							stmt.setInt(1, order.getId());
-							stmt.setInt(2, productId);
-							stmt.executeUpdate();
-						} catch (SQLException e) {
-							throw new RuntimeException(e);
-						}
-					}
+	private static void fillOrderProductsData(Connection connection, Order order,
+		PreparedStatement statement)
+		throws SQLException {
+		try (ResultSet resultSet = statement.executeQuery()) {
+			if (resultSet.first()) {
+				int productId = resultSet.getInt("id");
+				String sql = """
+					INSERT INTO OrderProducts(order_id, product_id)
+					VALUES( ? , ? )
+					""";
+				try (PreparedStatement stmt = connection.prepareStatement(sql,
+					Statement.RETURN_GENERATED_KEYS)) {
+					stmt.setInt(1, order.getId());
+					stmt.setInt(2, productId);
+					stmt.executeUpdate();
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
 				}
-			}
-			catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
 			}
 		}
 	}

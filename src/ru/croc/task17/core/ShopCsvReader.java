@@ -20,25 +20,33 @@ public class ShopCsvReader implements CsvReader<Order> {
 		String line = csvStream.readLine();
 		while (line != null) {
 			String[] input = line.split(",");
-			int orderId = Integer.parseInt(input[0]);
-			String buyerName = input[1];
-			String vendorCode = input[2];
-			String productName = input[3];
-			double price = Double.parseDouble(input[4]);
-			var product = new Product(vendorCode, productName, price);
-			productRegistry.add(product);
-			var order = orderRegistry.stream().filter(o -> o.getId() == orderId).findFirst();
-			if (order.isEmpty()) {
-				orderRegistry.add(new Order(orderId, buyerName, new ArrayList<>(
-					List.of(product)
-				)));
-			}
-			else {
-				order.get().addProduct(product);
-			}
+			getEntities(productRegistry, orderRegistry, input);
 			line = csvStream.readLine();
 		}
 
 		return orderRegistry;
+	}
+
+	private static void getEntities(
+		Set<Product> productRegistry,
+		Set<Order> orderRegistry,
+		String[] input) {
+		int orderId = Integer.parseInt(input[0]);
+		String buyerName = input[1];
+		String vendorCode = input[2];
+		String productName = input[3];
+		double price = Double.parseDouble(input[4]);
+		var product = new Product(vendorCode, productName, price);
+		productRegistry.add(product);
+		var order = orderRegistry.stream()
+			.filter(o -> o.getId() == orderId)
+			.findFirst();
+		if (order.isEmpty()) {
+			orderRegistry.add(new Order(orderId, buyerName, new ArrayList<>(
+				List.of(product)
+			)));
+		} else {
+			order.get().addProduct(product);
+		}
 	}
 }

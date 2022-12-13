@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Order {
+
 	private final int id;
 	private final String buyerName;
 	private final List<Product> products;
@@ -33,11 +34,10 @@ public class Order {
 	}
 
 	public Product addProduct(Product product) {
-		if (!products.add(product)) {
-			throw new IllegalArgumentException("KLklkklsdskldskdsklfdskldskl");
-		}
+		products.add(product);
 		return product;
 	}
+
 	@Override
 	public boolean equals(Object o) {
 		return o instanceof Order other
