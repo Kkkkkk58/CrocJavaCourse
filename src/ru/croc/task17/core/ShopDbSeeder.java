@@ -53,13 +53,13 @@ public class ShopDbSeeder implements DbSeeder<Order> {
 
 	private static void seedOrderData(Connection connection, Order order) {
 		String sql = """
-			MERGE INTO Orders(id, buyer_name)
+			MERGE INTO Orders(id, buyer_login)
 			KEY(id)
 			VALUES(?, ?)
 			""";
 		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setInt(1, order.getId());
-			stmt.setString(2, order.getBuyerName());
+			stmt.setString(2, order.getBuyerLogin());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);

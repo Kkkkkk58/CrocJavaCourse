@@ -31,7 +31,7 @@ public class ShopSchemaCreator implements SchemaCreator {
 			DROP TABLE IF EXISTS Orders;
 			CREATE TABLE Orders
 			(id IDENTITY NOT NULL PRIMARY KEY,
-			buyer_name VARCHAR(255) NOT NULL)
+			buyer_login VARCHAR(255) NOT NULL)
 			""");
 	}
 

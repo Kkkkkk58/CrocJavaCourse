@@ -9,15 +9,15 @@ import java.util.Objects;
 public class Order {
 
 	private final int id;
-	private final String buyerName;
+	private final String buyerLogin;
 	private final List<Product> products;
 
-	public Order(int id, String buyerName, Collection<Product> products) {
+	public Order(int id, String buyerLogin, Collection<Product> products) {
 		if (id < 0) {
 			throw new IllegalArgumentException("Negative id");
 		}
 		this.id = id;
-		this.buyerName = buyerName;
+		this.buyerLogin = buyerLogin;
 		this.products = new ArrayList<>(products);
 	}
 
@@ -25,8 +25,8 @@ public class Order {
 		return id;
 	}
 
-	public String getBuyerName() {
-		return buyerName;
+	public String getBuyerLogin() {
+		return buyerLogin;
 	}
 
 	public Collection<Product> getProducts() {
