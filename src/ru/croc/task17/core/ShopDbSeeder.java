@@ -41,9 +41,9 @@ public class ShopDbSeeder implements DbSeeder<Order> {
 		for (Product product : products) {
 			try (PreparedStatement statement = connection.prepareStatement(sql,
 				Statement.RETURN_GENERATED_KEYS)) {
-				statement.setString(1, product.vendorCode());
-				statement.setString(2, product.name());
-				statement.setDouble(3, product.price());
+				statement.setString(1, product.getVendorCode());
+				statement.setString(2, product.getName());
+				statement.setDouble(3, product.getPrice());
 				statement.executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
@@ -71,7 +71,7 @@ public class ShopDbSeeder implements DbSeeder<Order> {
 			SELECT * FROM Products WHERE vendor_code = ?
 			""";
 		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, product.vendorCode());
+			statement.setString(1, product.getVendorCode());
 			fillOrderProductsData(connection, order, statement);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
